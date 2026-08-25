@@ -55,7 +55,8 @@ export function AppShell({ children }) {
         )}
       >
         <AppNavbar collapsed={collapsed} onToggleSidebar={() => setCollapsed((v) => !v)} />
-        <main key={pathname} className="animate-fade-up mt-[4.0rem] h-[calc(100dvh-5.25rem)] min-h-0 flex-none overflow-y-auto px-4 pb-4 pt-4 md:px-1 md:pb-5">
+          {/* <main key={pathname} className="animate-fade-up mt-[4.0rem] h-[calc(100dvh-5.25rem)] min-h-0 flex-none overflow-y-auto px-4 pb-4 pt-4 md:px-1 md:pb-5"> */}
+        <main key={pathname} className="animate-fade-up mt-[4.0rem] h-[calc(100dvh-4rem)] min-h-0 flex-none overflow-y-auto px-4 pb-4 pt-4 md:h-[calc(100dvh-5.25rem)] md:px-1 md:pb-5">
           {children}
         </main>
       </div>
