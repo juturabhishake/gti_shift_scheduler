@@ -12,23 +12,6 @@ model AccessTypes {
   access_type String @db.VarChar(50)
 }
 
-model Categories {
-  Id            Int             @id(map: "PK__Categori__3214EC07182768A9") @default(autoincrement())
-  Name          String          @db.NVarChar(255)
-  TeamId        Int
-  Teams         Teams           @relation(fields: [TeamId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK__Categorie__TeamI__245D67DE")
-  Subcategories Subcategories[]
-}
-
-model Departments {
-  Id       Int        @id(map: "PK__Departme__3214EC074F938E44") @default(autoincrement())
-  Name     String     @db.NVarChar(255)
-  GroupId  Int
-  Groups   Groups     @relation(fields: [GroupId], references: [Id], onUpdate: NoAction, map: "FK__Departmen__Group__7C4F7684")
-  Sections Sections[]
-  Teams    Teams[]
-}
-
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 model ErrorLogs {
   ID         Int     @default(autoincrement())
@@ -36,14 +19,6 @@ model ErrorLogs {
   ERRORMSG   String? @db.VarChar(Max)
 
   @@ignore
-}
-
-model Groups {
-  Id          Int           @id(map: "PK__Groups__3214EC0738386975") @default(autoincrement())
-  Name        String        @unique(map: "UQ__Groups__737584F6545E7863") @db.NVarChar(255)
-  Departments Departments[]
-  Sections    Sections[]
-  Teams       Teams[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -130,95 +105,22 @@ model ProductMatrix {
   UpdatedBy         String?   @db.VarChar(10)
 }
 
-model Sections {
-  Id          Int         @id(map: "PK__Sections__3214EC075EAFA74F") @default(autoincrement())
-  Name        String      @db.NVarChar(255)
-  DeptId      Int
-  GroupId     Int?
-  Departments Departments @relation(fields: [DeptId], references: [Id], onUpdate: NoAction, map: "FK__Sections__DeptId__00200768")
-  Groups      Groups?     @relation(fields: [GroupId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Sections_GroupId")
-  Teams       Teams[]
-}
-
-model Shifts {
-  Id    Int    @id(map: "PK__Shifts__3214EC079E7F2C09") @default(autoincrement())
-  Name  String @unique(map: "UQ__Shifts__737584F69E02FCDF") @db.NVarChar(50)
-  Hours Float  @default(8.0, map: "DF__Shifts__Hours__4D5F7D71")
-}
-
 model ShopLocations {
-  ShopID       Int    @id(map: "PK__ShopLoca__67C556299E1EBB23") @default(autoincrement())
+  ShopID       Int    @id(map: "PK__ShopLoca__67C55629931BD6A6") @default(autoincrement())
   LocationName String @db.VarChar(100)
 }
 
-model Subcategories {
-  Id            Int        @id(map: "PK__Subcateg__3214EC0779644CD1") @default(autoincrement())
-  Name          String     @db.NVarChar(255)
-  StandardHours Float      @default(0, map: "DF__Subcatego__Stand__2739D489")
-  CategoryId    Int
-  CreatedDate   DateTime   @default(now(), map: "DF__Subcatego__Creat__3C34F16F") @db.DateTime
-  Project       String?    @db.NVarChar(255)
-  MaxHours      Float?
-  MediumHours   Float?
-  MinHours      Float?
-  Categories    Categories @relation(fields: [CategoryId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK__Subcatego__Categ__282DF8C2")
-}
-
-model TaskAssignment {
-  Id                  Int       @id(map: "PK__TaskAssi__3214EC07B2ECA664") @default(autoincrement())
-  SubcategoryId       Int
-  AssignedUserId      Int?
-  ActualHours         Float?
-  StatusId            Int?
-  Reason              String?   @db.NVarChar(Max)
-  TaskDetails         String?   @db.NVarChar(Max)
-  WorkDate            DateTime? @db.DateTime
-  DueDate             DateTime? @db.DateTime
-  Severity            String?   @db.NVarChar(50)
-  TargetStandardHours Float?
-  ProgressPct         Int?      @default(0, map: "DF__TaskAssig__Progr__531856C7")
-}
-
-model TaskStatusMaster {
-  Id         Int    @id(map: "PK__TaskStat__3214EC078E50BDEE") @default(autoincrement())
-  StatusName String @db.NVarChar(50)
-}
-
-model Teams {
-  Id          Int          @id(map: "PK__Teams__3214EC071F092FCC") @default(autoincrement())
-  Name        String       @db.NVarChar(255)
-  SectionId   Int
-  GroupId     Int?
-  DeptId      Int?
-  Categories  Categories[]
-  Sections    Sections     @relation(fields: [SectionId], references: [Id], onUpdate: NoAction, map: "FK__Teams__SectionId__03F0984C")
-  Departments Departments? @relation(fields: [DeptId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Teams_DeptId")
-  Groups      Groups?      @relation(fields: [GroupId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Teams_GroupId")
-}
-
-model UserHierarchyMap {
-  Id         Int        @id(map: "PK__UserHier__3214EC07F9BE46D2") @default(autoincrement())
-  UserId     Int
-  GroupId    Int?
-  DeptId     Int?
-  SectionId  Int?
-  TeamId     Int?
-  ShiftId    Int?
-  UserMaster UserMaster @relation(fields: [UserId], references: [UserID], onDelete: Cascade, onUpdate: NoAction, map: "FK__UserHiera__UserI__2180FB33")
-}
-
 model UserMaster {
-  UserID           Int                @id(map: "PK_UserMaster") @default(autoincrement())
-  EmployeeId       String             @db.VarChar(10)
-  Username         String             @db.VarChar(200)
-  Password         String             @db.NVarChar(200)
-  CreatedDate      DateTime           @default(now(), map: "DF_UserMaster_CreatedDate") @db.DateTime
-  CreatedBy        String?            @db.VarChar(200)
-  IsActive         Int                @default(1, map: "DF_UserMaster_IsActive")
-  AuthMode         String?            @db.VarChar(50)
-  Department       String?            @db.NVarChar(50)
-  Position         String?            @db.NVarChar(50)
-  Section          String?            @db.VarChar(50)
-  Designation      String?            @db.VarChar(Max)
-  UserHierarchyMap UserHierarchyMap[]
+  UserID      Int      @id(map: "PK_UserMaster") @default(autoincrement())
+  EmployeeId  String   @db.VarChar(10)
+  Username    String   @db.VarChar(200)
+  Password    String   @db.NVarChar(200)
+  CreatedDate DateTime @default(now(), map: "DF_UserMaster_CreatedDate") @db.DateTime
+  CreatedBy   String?  @db.VarChar(200)
+  IsActive    Int      @default(1, map: "DF_UserMaster_IsActive")
+  AuthMode    String?  @db.VarChar(50)
+  Department  String?  @db.NVarChar(50)
+  Position    String?  @db.NVarChar(50)
+  Section     String?  @db.VarChar(50)
+  Designation String?  @db.VarChar(Max)
 }
