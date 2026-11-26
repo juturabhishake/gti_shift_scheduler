@@ -6,6 +6,7 @@ import { AppSidebar } from "./AppSidebar";
 import { AppNavbar } from "./AppNavbar";
 import { cn } from "@/lib/utils";
 import { getStoredAuth, redirectToLogin } from "@/lib/auth";
+import { IssuesProvider } from "@/app/ng_major_issues/context/IssuesContext";
 
 export function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -42,7 +43,7 @@ export function AppShell({ children }) {
     return children;
   }
 
-  return (
+  const shell = (
     <div className="min-h-dvh bg-transparent">
       <div className="hidden md:block">
         <AppSidebar collapsed={collapsed} />
@@ -55,11 +56,16 @@ export function AppShell({ children }) {
         )}
       >
         <AppNavbar collapsed={collapsed} onToggleSidebar={() => setCollapsed((v) => !v)} />
-          {/* <main key={pathname} className="animate-fade-up mt-[4.0rem] h-[calc(100dvh-5.25rem)] min-h-0 flex-none overflow-y-auto px-4 pb-4 pt-4 md:px-1 md:pb-5"> */}
         <main key={pathname} className="animate-fade-up mt-[4.0rem] h-[calc(100dvh-4rem)] min-h-0 flex-none overflow-y-auto px-4 pb-4 pt-4 md:h-[calc(100dvh-5.25rem)] md:px-1 md:pb-5">
           {children}
         </main>
       </div>
     </div>
   );
+
+  if (pathname?.startsWith("/ng_major_issues")) {
+    return <IssuesProvider>{shell}</IssuesProvider>;
+  }
+
+  return shell;
 }

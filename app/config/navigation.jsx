@@ -9,6 +9,9 @@ import {
   Info,
   LogOut,
   UserCog,
+  AlertTriangle,
+  Table2,
+  History,
 } from "lucide-react";
 
 export const navItems = [
@@ -31,6 +34,16 @@ export const navItems = [
     ],
   },
   { title: "Information", url: "/information", icon: Info },
+  {
+    title: "NG Major Issues",
+    url: "#",
+    icon: AlertTriangle,
+    items: [
+      { title: "Form", url: "/ng_major_issues/form", icon: FilePlus },
+      { title: "My History", url: "/ng_major_issues/history", icon: History },
+      { title: "All Issues View", url: "/ng_major_issues/view", icon: Table2 },
+    ],
+  },
 ];
 
 export const navSecondaryItems = [
