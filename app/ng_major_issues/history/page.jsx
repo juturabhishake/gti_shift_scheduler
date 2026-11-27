@@ -8,6 +8,7 @@ import StatusPill from '@/components/ng_issues/StatusPill';
 import MultiSelectFilter from '@/components/ng_issues/MultiSelectFilter';
 import { cn } from '@/lib/utils';
 import { useAccessCheck } from "@/lib/useAccessCheck";
+import { encryptId } from "@/lib/crypto";
 const COLUMNS = [
   { key: 'IssueNumber', label: 'Issue Number', group: 'Issue Details' },
   { key: 'DateRaised', label: 'Date Raised', group: 'Issue Details' },
@@ -191,7 +192,7 @@ export default function HistoryPage() {
 
   if (!currentUser) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center p-8">
+      <div hidden className="flex min-h-[60vh] flex-col items-center justify-center p-8">
         <div className="rounded-2xl border border-border/80 bg-card/70 p-8 text-center shadow-lg backdrop-blur-xl max-w-md">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <User className="size-6" />
@@ -210,7 +211,7 @@ export default function HistoryPage() {
     Object.values(columnFilters).reduce((acc, curr) => acc + (curr?.length > 0 ? 1 : 0), 0);
 
   return (
-    <div className="flex min-h-screen flex-col p-2 md:p-4 space-y-4 max-w-[1700px] mx-auto w-full">
+    <div className="flex min-h-screen flex-col p-2 md:p-2 space-y-2 w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -339,7 +340,7 @@ export default function HistoryPage() {
                   >
                     <td className="border-r border-border/60 px-2.5 py-2.5 text-center whitespace-nowrap sticky left-0 bg-card/90 backdrop-blur z-20 group-hover:bg-muted/60">
                       <button
-                        onClick={() => router.push(`/ng_major_issues/form?id=${row.Id}`)}
+                        onClick={() => router.push(`/ng_major_issues/form?id=${encryptId(row.Id)}`)}
                         className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all"
                       >
                         <ExternalLink className="size-3" />

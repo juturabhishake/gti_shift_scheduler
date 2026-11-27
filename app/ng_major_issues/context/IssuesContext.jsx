@@ -29,6 +29,7 @@ export function IssuesProvider({ children }) {
             EmployeeId: auth.employeeId,
             Username: auth.fullName || auth.employeeId,
             Position: auth.role || '',
+            role: auth.role || '',
             Department: auth.department || '',
           });
         }

@@ -9,6 +9,9 @@ import { useIssues } from '@/app/ng_major_issues/context/IssuesContext';
 import Combobox from '@/components/ng_issues/Combobox';
 import StatusPill from '@/components/ng_issues/StatusPill';
 import { useAccessCheck } from "@/lib/useAccessCheck";
+import { useAdminAccessCheck } from "@/lib/checkAdmin";
+import { decryptId } from "@/lib/crypto";
+import { getStoredAuth } from "@/lib/auth";
 const EMPTY_SECTION_1 = {
   IssueNumber: '',
   DateRaised: '',
@@ -157,7 +160,8 @@ function SectionCard({ title, children, locked, lockReason, onSave, onReset, sav
 
 function IssueFormContent() {
   const searchParams = useSearchParams();
-  const idParam = searchParams.get('id');
+  const rawIdParam = searchParams.get('id');
+  const idParam = rawIdParam ? decryptId(rawIdParam) : null;
   const isEditMode = Boolean(idParam);
   const PAGE_ID_FOR_THIS_FORM = 2034;
   
@@ -165,7 +169,13 @@ function IssueFormContent() {
     isLoading: isAccessLoading,
     hasAccess,
   } = useAccessCheck(PAGE_ID_FOR_THIS_FORM);
+  const { hasAccess: isAdmin } = useAdminAccessCheck(PAGE_ID_FOR_THIS_FORM);
   const { dropdowns, currentUser, allUsers, hosUsers } = useIssues();
+
+  const storedAuth = typeof window !== 'undefined' ? getStoredAuth() : null;
+  const currentEmpId = currentUser?.EmployeeId || storedAuth?.employeeId || '';
+  const currentRole = String(currentUser?.role || currentUser?.Position || storedAuth?.role || '').trim().toUpperCase();
+  const isHOD = currentRole === 'HOD';
 
   const [recordId, setRecordId] = useState(0);
   const [sec1, setSec1] = useState({ ...EMPTY_SECTION_1 });
@@ -208,9 +218,39 @@ function IssueFormContent() {
     sec2.SubmissionStatus
   );
 
-  const canEditSection2 = !isClosed && isSec1Complete;
-  const canEditSection3 = !isClosed && isSec1Complete && isSec2Complete;
-  const section1Disabled = isClosed;
+  const isAssignedToSec2 = Boolean(
+    currentEmpId && (
+      String(sec1.FirstLevelInformedId).trim() === String(currentEmpId).trim() ||
+      String(sec1.ResponsibleSectionHeadId).trim() === String(currentEmpId).trim()
+    )
+  );
+
+  const canEditSection1 = isAdmin || !isClosed;
+  const canEditSection2 = isAdmin || (!isClosed && isSec1Complete && isAssignedToSec2);
+  const canEditSection3 = isAdmin || (!isClosed && isSec1Complete && isSec2Complete && isHOD);
+  const section1Disabled = !canEditSection1;
+
+  const lockReasonPPC = isClosed
+    ? 'Closed'
+    : !recordId
+    ? 'Issue details not found'
+    : !isSec1Complete
+    ? 'Issue details must be saved first'
+    : !isAssignedToSec2
+    ? 'Only assigned First Level or Section Head can edit'
+    : undefined;
+
+  const lockReasonHandler = isClosed
+    ? 'Closed'
+    : !recordId
+    ? 'Issue details not found'
+    : !isSec1Complete
+    ? 'Issue details must be saved first'
+    : !isSec2Complete
+    ? 'PPC details must be saved first'
+    : !isHOD
+    ? 'Only HOD role can edit'
+    : undefined;
 
   useEffect(() => {
     if (!idParam) return;
@@ -428,7 +468,7 @@ function IssueFormContent() {
   }));
 
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-2">
       <div className="flex items-center justify-between gap-4 px-2 py-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -626,15 +666,7 @@ function IssueFormContent() {
       <SectionCard
         title="PPC"
         locked={!canEditSection2}
-        lockReason={
-          isClosed
-            ? 'Closed'
-            : !recordId
-            ? 'Issue details not found'
-            : !isSec1Complete
-            ? 'Issue details must be saved first'
-            : undefined
-        }
+        lockReason={lockReasonPPC}
         onSave={handleSaveSection2}
         onReset={() => {
           setSec2({ ...EMPTY_SECTION_2 });
@@ -683,17 +715,7 @@ function IssueFormContent() {
       <SectionCard
         title="Handler"
         locked={!canEditSection3}
-        lockReason={
-          isClosed
-            ? 'Closed'
-            : !recordId
-            ? 'Issue details not found'
-            : !isSec1Complete
-            ? 'Issue details must be saved first'
-            : !isSec2Complete
-            ? 'PPC details must be saved first'
-            : undefined
-        }
+        lockReason={lockReasonHandler}
         onSave={handleSaveSection3}
         onReset={() => {
           setSec3({ ...EMPTY_SECTION_3 });

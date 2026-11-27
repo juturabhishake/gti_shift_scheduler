@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import StatusPill from '@/components/ng_issues/StatusPill';
+import { encryptId } from '@/lib/crypto';
 
 const GROUPS = [
   {
@@ -434,7 +435,7 @@ export default function IssueRecordsTable({ records, loading, error, emptyMessag
                   </td>
                 ))}
                 <td className="border-b px-2 py-2">
-                  <Button size="sm" variant="outline" onClick={() => router.push(`/ng_major_issues/form?id=${row.Id}`)}>Edit</Button>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/ng_major_issues/form?id=${encryptId(row.Id)}`)}>Edit</Button>
                 </td>
               </tr>
             ))}
@@ -458,7 +459,7 @@ export default function IssueRecordsTable({ records, loading, error, emptyMessag
                 <h2 className="truncate text-sm font-semibold text-card-foreground">Issue {row.IssueNumber || '—'}</h2>
                 <p className="mt-1 text-xs text-muted-foreground">{formatValue({ key: 'DateRaised', date: true }, row)} · {row.RaisedSection || 'No section'}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => router.push(`/ng_major_issues/form?id=${row.Id}`)}>Edit</Button>
+              <Button size="sm" variant="outline" onClick={() => router.push(`/ng_major_issues/form?id=${encryptId(row.Id)}`)}>Edit</Button>
             </div>
             <div className="grid grid-cols-2 gap-3 p-4">
               <div className="col-span-2 text-xs">

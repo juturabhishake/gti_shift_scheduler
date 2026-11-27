@@ -10,6 +10,8 @@ import DateRangePicker from '@/components/ng_issues/DateRangePicker';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useAccessCheck } from "@/lib/useAccessCheck";
+import { useAdminAccessCheck } from "@/lib/checkAdmin";
+import { encryptId } from "@/lib/crypto";
 const COLUMNS = [
   { key: 'IssueNumber', label: 'Issue Number', group: 'Issue Details' },
   { key: 'DateRaised', label: 'Date Raised', group: 'Issue Details' },
@@ -54,6 +56,7 @@ export default function ViewPage() {
     isLoading: isAccessLoading,
     hasAccess,
   } = useAccessCheck(PAGE_ID_FOR_THIS_FORM);
+  const { hasAccess: isAdmin } = useAdminAccessCheck(PAGE_ID_FOR_THIS_FORM);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -197,7 +200,7 @@ export default function ViewPage() {
     Object.values(columnFilters).reduce((acc, curr) => acc + (curr?.length > 0 ? 1 : 0), 0);
 
   return (
-    <div className="flex min-h-screen flex-col Complete and Save Section 1 first space-y-4 mx-auto w-full">
+    <div className="flex min-h-screen flex-col Complete and Save Section 1 first space-y-2 p-2 md:p-2 mx-auto w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -258,9 +261,11 @@ export default function ViewPage() {
           <table className="w-full border-collapse text-left text-xs text-foreground">
             <thead className="sticky top-0 z-30 bg-muted/95 backdrop-blur-md border-b border-border shadow-sm">
               <tr>
-                <th className="border-r border-border/60 px-3 py-3 font-semibold text-muted-foreground text-center w-16 sticky left-0 z-40 bg-muted/95">
-                  Actions
-                </th>
+                {isAdmin && (
+                  <th className="border-r border-border/60 px-3 py-3 font-semibold text-muted-foreground text-center w-16 sticky left-0 z-40 bg-muted/95">
+                    Actions
+                  </th>
+                )}
                 {COLUMNS.map((col) => {
                   const isSorted = sortConfig.key === col.key;
                   const filterOptions = uniqueColumnValues[col.key] || [];
@@ -302,9 +307,11 @@ export default function ViewPage() {
               {loading ? (
                 Array.from({ length: 8 }).map((_, rIdx) => (
                   <tr key={rIdx} className="animate-pulse">
-                    <td className="border-r border-border/60 px-3 py-3 sticky left-0 bg-card">
-                      <div className="h-4 w-10 bg-muted rounded" />
-                    </td>
+                    {isAdmin && (
+                      <td className="border-r border-border/60 px-3 py-3 sticky left-0 bg-card">
+                        <div className="h-4 w-10 bg-muted rounded" />
+                      </td>
+                    )}
                     {COLUMNS.map((c) => (
                       <td key={c.key} className="border-r border-border/60 px-3 py-3">
                         <div className="h-4 bg-muted rounded w-24" />
@@ -315,7 +322,7 @@ export default function ViewPage() {
               ) : paginatedRecords.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={COLUMNS.length + 1}
+                    colSpan={COLUMNS.length + (isAdmin ? 1 : 0)}
                     className="py-16 text-center text-sm font-medium text-muted-foreground"
                   >
                     No matching records found.
@@ -327,15 +334,17 @@ export default function ViewPage() {
                     key={row.Id ?? idx}
                     className="transition-colors hover:bg-muted/40 cursor-default group"
                   >
-                    <td className="border-r border-border/60 px-2.5 py-2.5 text-center whitespace-nowrap sticky left-0 bg-card/90 backdrop-blur z-20 group-hover:bg-muted/60">
-                      <button
-                        onClick={() => router.push(`/ng_major_issues/form?id=${row.Id}`)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all"
-                      >
-                        <ExternalLink className="size-3" />
-                        <span>Edit</span>
-                      </button>
-                    </td>
+                    {isAdmin && (
+                      <td className="border-r border-border/60 px-2.5 py-2.5 text-center whitespace-nowrap sticky left-0 bg-card/90 backdrop-blur z-20 group-hover:bg-muted/60">
+                        <button
+                          onClick={() => router.push(`/ng_major_issues/form?id=${encryptId(row.Id)}`)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-border/80 bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                        >
+                          <ExternalLink className="size-3" />
+                          <span>Edit</span>
+                        </button>
+                      </td>
+                    )}
 
                     {COLUMNS.map((col) => (
                       <td
